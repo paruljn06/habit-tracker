@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Streak — a galaxy habit tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="starField"></div>
+
+<div class="page">
+
+  <!-- ===== Header ===== -->
+  <header class="header">
+    <div class="greeting-row">
+      <p class="greeting-line" id="greetingLine">Hello</p>
+      <button class="greeting-edit-btn" id="editNameBtn" type="button" title="Change your name" aria-label="Change your name">✎</button>
+    </div>
+    <div class="header-top">
+      <p class="eyebrow" id="dateLine">Loading…</p>
+      <div class="icon-row">
+        <button class="icon-btn" id="dataMenuBtn" type="button" title="Export / import data" aria-label="Export or import data">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 17v2a2 2 0 002 2h10a2 2 0 002-2v-2"/></svg>
+        </button>
+        <button class="icon-btn" id="themeToggleBtn" type="button" title="Toggle theme" aria-label="Toggle dark or light theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" id="themeIcon"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <nav class="tabs" id="tabs">
+      <button class="tab is-active" data-view="today" type="button">Today</button>
+      <button class="tab" data-view="manage" type="button">All habits</button>
+      <button class="tab" data-view="stats" type="button">Stats</button>
+    </nav>
+
+    <h1 class="today-count" id="progressLine">—</h1>
+    <p class="motivation-line" id="motivationLine"></p>
+
+    <div class="reminder-banner" id="reminderBanner" hidden>
+      <div class="reminder-icon">✨</div>
+      <div class="reminder-body">
+        <p class="reminder-title">Still due today</p>
+        <p class="reminder-list" id="reminderList"></p>
+      </div>
+      <button class="reminder-dismiss" id="reminderDismissBtn" type="button" aria-label="Dismiss reminder">✕</button>
+    </div>
+  </header>
+
+  <!-- ===== TODAY VIEW ===== -->
+  <main class="view" id="view-today">
+    <div id="todayGroups"></div>
+
+    <div class="empty-state" id="todayEmpty" hidden>
+      <p class="empty-title">Nothing due today.</p>
+      <p class="empty-body">Enjoy the morning off, or add a habit to get moving.</p>
+    </div>
+
+    <button class="add-link" id="openAddFromToday" type="button">+ Add a habit</button>
+  </main>
+
+  <!-- ===== MANAGE VIEW ===== -->
+  <main class="view" id="view-manage" hidden>
+    <div class="search-row">
+      <input type="text" id="searchInput" class="search-input" placeholder="Find a habit…" autocomplete="off" />
+    </div>
+
+    <div id="manageActive"></div>
+
+    <div class="empty-state" id="manageEmpty" hidden>
+      <p class="empty-title">No habits match "<span id="searchTermEcho"></span>".</p>
+    </div>
+
+    <button class="add-link" id="openAddFromManage" type="button">+ Add a habit</button>
+
+    <section class="archive-section" id="archiveSection" hidden>
+      <button class="archive-toggle" id="archiveToggle" type="button">
+        <span id="archiveToggleLabel">Show archived (0)</span>
+      </button>
+      <div id="archivedList" class="archived-list" hidden></div>
+    </section>
+  </main>
+
+  <!-- ===== STATS VIEW ===== -->
+  <main class="view" id="view-stats" hidden>
+    <div class="stats-summary" id="statsSummary"></div>
+    <div id="statsHabits"></div>
+    <div class="empty-state" id="statsEmpty" hidden>
+      <p class="empty-title">No habits yet.</p>
+      <p class="empty-body">Add one to start building your history.</p>
+    </div>
+  </main>
+
+</div>
+
+<!-- ===== Add / Edit Habit Modal ===== -->
+<div class="modal-backdrop" id="modalBackdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h2 class="modal-title" id="modalTitle">New habit</h2>
+
+    <label class="field-label" for="habitNameInput">Name</label>
+    <input type="text" id="habitNameInput" class="field-input" placeholder="e.g. Drink water" maxlength="60" />
+
+    <label class="field-label">Repeats</label>
+    <div class="schedule-options" id="scheduleOptions">
+      <button class="schedule-chip" data-schedule="daily" type="button">Every day</button>
+      <button class="schedule-chip" data-schedule="weekdays" type="button">Weekdays</button>
+      <button class="schedule-chip" data-schedule="custom" type="button">Choose days</button>
+    </div>
+
+    <div class="day-picker" id="dayPicker" hidden>
+      <button class="day-pip" data-day="1" type="button">M</button>
+      <button class="day-pip" data-day="2" type="button">T</button>
+      <button class="day-pip" data-day="3" type="button">W</button>
+      <button class="day-pip" data-day="4" type="button">T</button>
+      <button class="day-pip" data-day="5" type="button">F</button>
+      <button class="day-pip" data-day="6" type="button">S</button>
+      <button class="day-pip" data-day="0" type="button">S</button>
+    </div>
+
+    <p class="modal-error" id="modalError" hidden></p>
+
+    <div class="modal-actions">
+      <div class="modal-actions-left">
+        <button class="btn-text" id="archiveHabitBtn" type="button" hidden>Archive</button>
+        <button class="btn-ghost" id="deleteHabitBtn" type="button" hidden>Delete forever</button>
+      </div>
+      <div class="modal-actions-right">
+        <button class="btn-text" id="cancelModalBtn" type="button">Cancel</button>
+        <button class="btn-primary" id="saveHabitBtn" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Name Modal ===== -->
+<div class="modal-backdrop" id="nameModalBackdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="nameModalTitle">
+    <h2 class="modal-title" id="nameModalTitle">What should we call you?</h2>
+    <p class="modal-subtitle">Just for a friendly hello each morning — stored only in this browser.</p>
+    <input type="text" id="nameInput" class="field-input" placeholder="e.g. Ananya" maxlength="30" />
+    <div class="modal-actions">
+      <div class="modal-actions-left"></div>
+      <div class="modal-actions-right">
+        <button class="btn-text" id="skipNameBtn" type="button">Skip</button>
+        <button class="btn-primary" id="saveNameBtn" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Data (Export / Import) Modal ===== -->
+<div class="modal-backdrop" id="dataModalBackdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="dataModalTitle">
+    <h2 class="modal-title" id="dataModalTitle">Your data</h2>
+    <p class="modal-subtitle">Everything is stored only in this browser. Export a backup, or bring data in from a backup file.</p>
+
+    <div class="data-actions">
+      <div class="data-action-row">
+        <div class="data-action-copy">
+          <p class="data-action-title">Export as JSON</p>
+          <p class="data-action-desc">Download all habits and history.</p>
+        </div>
+        <button class="btn-secondary" id="exportBtn" type="button">Export</button>
+      </div>
+
+      <div class="data-action-row">
+        <div class="data-action-copy">
+          <p class="data-action-title">Import from JSON</p>
+          <p class="data-action-desc">Replaces everything currently saved here.</p>
+        </div>
+        <label class="file-input-label" for="importFileInput">Choose file</label>
+        <input type="file" id="importFileInput" accept="application/json,.json" />
+      </div>
+    </div>
+
+    <p class="data-status" id="dataStatus"></p>
+
+    <div class="modal-actions">
+      <div class="modal-actions-left"></div>
+      <div class="modal-actions-right">
+        <button class="btn-text" id="closeDataModalBtn" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Calendar Modal ===== -->
+<div class="modal-backdrop" id="calendarModalBackdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="calendarModalTitle">
+    <h2 class="modal-title" id="calendarModalTitle">Habit</h2>
+    <p class="cal-streak-line" id="calStreakLine"></p>
+
+    <div class="cal-nav">
+      <button class="cal-nav-btn" id="calPrevBtn" type="button" aria-label="Previous month">‹</button>
+      <span class="cal-month-label" id="calMonthLabel"></span>
+      <button class="cal-nav-btn" id="calNextBtn" type="button" aria-label="Next month">›</button>
+    </div>
+
+    <div class="cal-weekday-row">
+      <span class="cal-weekday">S</span><span class="cal-weekday">M</span><span class="cal-weekday">T</span>
+      <span class="cal-weekday">W</span><span class="cal-weekday">T</span><span class="cal-weekday">F</span>
+      <span class="cal-weekday">S</span>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+
+    <div class="cal-legend">
+      <span class="cal-legend-item"><span class="cal-legend-swatch is-done"></span> Done</span>
+      <span class="cal-legend-item"><span class="cal-legend-swatch is-missed"></span> Missed</span>
+      <span class="cal-legend-item"><span class="cal-legend-swatch is-pending"></span> Due today</span>
+    </div>
+
+    <div class="modal-actions">
+      <div class="modal-actions-left"></div>
+      <div class="modal-actions-right">
+        <button class="btn-text" id="closeCalendarModalBtn" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Toast ===== -->
+<div class="toast" id="toast" hidden>
+  <span id="toastMessage"></span>
+  <button class="toast-action" id="toastActionBtn" type="button" hidden></button>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

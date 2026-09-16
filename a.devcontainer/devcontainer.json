@@ -1,0 +1,13 @@
+{
+  "name": "streak-habit-tracker",
+  "image": "mcr.microsoft.com/devcontainers/base:jammy",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ritwickdey.LiveServer"
+      ]
+    }
+  },
+  "forwardPorts": [5500],
+  "postAttachCommand": "echo 'Right-click index.html and choose \"Open with Live Server\" to run the app.'"
+}
